@@ -11,10 +11,8 @@ import ru.aqsi.commons.models.printingModels.FeedPaper
 import ru.aqsi.commons.models.printingModels.QrShtrihCodePrintingModel
 import ru.aqsi.commons.models.printingModels.StringPrintingModel
 import ru.aqsi.commons.receivers.AqsiResultReceiver
-import ru.aqsi.commons.rmk.ActiveCashierDB
-import ru.aqsi.commons.rmk.AqsiRMK
-import ru.aqsi.commons.rmk.createCashier
-import ru.aqsi.commons.rmk.getAllCashiers
+import ru.aqsi.commons.rmk.*
+import java.util.UUID
 
 
 class MainActivity : AppCompatActivity() {
@@ -97,6 +95,18 @@ class MainActivity : AppCompatActivity() {
         }
     }
     private fun handleButtonClick5() {
+        val activity = this
+        getAllCashiers().forEach {
+            if (it.cashierPosition != Cashier.ADMIN && it.id ?: "" != "") {
+                val cashier = Cashier(
+                    cashierName = UUID.randomUUID().toString(),
+                    cashierPosition = Cashier.ORDINARY,
+                    pin = "1234",
+                    inn = "001122334455"
+                )
+                updateCashier(it.id ?: "", cashier)
+            }
+        }
 
     }
 }
