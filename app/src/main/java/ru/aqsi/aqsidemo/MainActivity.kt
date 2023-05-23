@@ -104,7 +104,8 @@ class MainActivity : AppCompatActivity() {
                     pin = "1234",
                     inn = "001122334455"
                 )
-                updateCashier(it.id ?: "", cashier)
+                val out = updateCashier(it.id ?: "", cashier)
+                Toast.makeText(this, "Cashier update ${if (out)" SUCCESS" else "FAIL"}", Toast.LENGTH_LONG).show()
             }
         }
 
