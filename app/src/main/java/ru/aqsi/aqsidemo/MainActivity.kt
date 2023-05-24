@@ -21,6 +21,11 @@ class MainActivity : AppCompatActivity() {
     private val button3 by lazy { findViewById<MaterialButton?>(R.id.main_button_test3) }
     private val button4 by lazy { findViewById<MaterialButton?>(R.id.main_button_test4) }
     private val button5 by lazy { findViewById<MaterialButton?>(R.id.main_button_test5) }
+    private val button6 by lazy { findViewById<MaterialButton?>(R.id.main_button_test6) }
+    private val button7 by lazy { findViewById<MaterialButton?>(R.id.main_button_test7) }
+    private val button8 by lazy { findViewById<MaterialButton?>(R.id.main_button_test8) }
+    private val button9 by lazy { findViewById<MaterialButton?>(R.id.main_button_test9) }
+    private val button0 by lazy { findViewById<MaterialButton?>(R.id.main_button_test0) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -30,6 +35,11 @@ class MainActivity : AppCompatActivity() {
         button3.setOnClickListener { this.handleButtonClick3() }
         button4.setOnClickListener { this.handleButtonClick4() }
         button5.setOnClickListener { this.handleButtonClick5() }
+        button6.setOnClickListener { this.handleButtonClick6() }
+        button7.setOnClickListener { this.handleButtonClick7() }
+        button8.setOnClickListener { this.handleButtonClick8() }
+        button9.setOnClickListener { this.handleButtonClick9() }
+        button0.setOnClickListener { this.handleButtonClick0() }
     }
 
     private fun handleButtonClick1() {
@@ -110,4 +120,9 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
+    private fun handleButtonClick6() { }
+    private fun handleButtonClick7() { }
+    private fun handleButtonClick8() { }
+    private fun handleButtonClick9() { }
+    private fun handleButtonClick0() { }
 }
