@@ -82,12 +82,12 @@ class MainActivity : AppCompatActivity() {
     }
     private fun handleButtonClick1() {
         val activity = this
-        val d: Drawable? = ContextCompat.getDrawable(this, R.drawable.imagetsumlightbw)
+        val d: Drawable? = ContextCompat.getDrawable(this, R.drawable.image_aqsi)
         val bitmap: Bitmap? = d?.let {
             drawableToBitmap(it)
         }
         val url: String = bitmap?.let {
-            getImageUri(this, it, "tsum_logo.bmp")
+            getImageUri(this, it, UUID.randomUUID().toString())
         } ?: run { "" }
         val path = getRealPathFromUri(this, Uri.parse(url))
         AqsiRMK.print(this, object : AqsiResultReceiver.ResultReceiverCallBack {
@@ -169,11 +169,12 @@ class MainActivity : AppCompatActivity() {
     }
     private fun handleButtonClick6() {
         val activity = this
-        val bitmap: Bitmap? = ContextCompat.getDrawable(this, R.drawable.image_tsum_dark_bw)?.let {
-            drawableToBitmap(it)
-        }
+//        val bitmap: Bitmap? = ContextCompat.getDrawable(this, R.drawable.png_tsum_dark)?.let {
+//            drawableToBitmap(it)
+//        }
+        val bitmap = BitmapFactory.decodeResource(App.appContext.resources, R.drawable.image_aqsi)
         val url: String = bitmap?.let {
-            getImageUri(this, it, "tsum_logo")
+            getImageUri(this, it, UUID.randomUUID().toString())
         } ?: run { "" }
         val path = getRealPathFromUri(this, Uri.parse(url))
         AqsiRMK.print(this, object : AqsiResultReceiver.ResultReceiverCallBack {
@@ -190,7 +191,7 @@ class MainActivity : AppCompatActivity() {
     }
     private fun handleButtonClick7() {
         val activity = this
-        val bmp = BitmapFactory.decodeResource(App.appContext.resources, R.drawable.image_tsum_dark_bw)
+            val bmp = BitmapFactory.decodeResource(App.appContext.resources, R.drawable.image_aqsi)
         AqsiRMK.getImageUri(this, bmp, UUID.randomUUID().toString())?.let {
             AqsiRMK.print(this, object : AqsiResultReceiver.ResultReceiverCallBack {
                 override fun onError(exception: Exception?) {}
