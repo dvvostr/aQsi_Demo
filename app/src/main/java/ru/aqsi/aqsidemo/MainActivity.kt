@@ -82,7 +82,7 @@ class MainActivity : AppCompatActivity() {
     }
     private fun handleButtonClick1() {
         val activity = this
-        val d: Drawable? = ContextCompat.getDrawable(this, R.drawable.image_aqsi)
+        val d: Drawable? = ContextCompat.getDrawable(this, R.drawable.logo_single_color1)
         val bitmap: Bitmap? = d?.let {
             drawableToBitmap(it)
         }
@@ -172,7 +172,7 @@ class MainActivity : AppCompatActivity() {
 //        val bitmap: Bitmap? = ContextCompat.getDrawable(this, R.drawable.png_tsum_dark)?.let {
 //            drawableToBitmap(it)
 //        }
-        val bitmap = BitmapFactory.decodeResource(App.appContext.resources, R.drawable.image_aqsi)
+        val bitmap = BitmapFactory.decodeResource(App.appContext.resources, R.drawable.logo_single_color1)
         val url: String = bitmap?.let {
             getImageUri(this, it, UUID.randomUUID().toString())
         } ?: run { "" }
@@ -191,7 +191,7 @@ class MainActivity : AppCompatActivity() {
     }
     private fun handleButtonClick7() {
         val activity = this
-            val bmp = BitmapFactory.decodeResource(App.appContext.resources, R.drawable.image_aqsi)
+            val bmp = BitmapFactory.decodeResource(App.appContext.resources, R.drawable.logo_single_color1)
         AqsiRMK.getImageUri(this, bmp, UUID.randomUUID().toString())?.let {
             AqsiRMK.print(this, object : AqsiResultReceiver.ResultReceiverCallBack {
                 override fun onError(exception: Exception?) {}
