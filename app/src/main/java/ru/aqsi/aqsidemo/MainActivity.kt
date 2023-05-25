@@ -1,18 +1,25 @@
 package ru.aqsi.aqsidemo
 
+import android.graphics.Bitmap
+import android.graphics.Canvas
+import android.graphics.drawable.BitmapDrawable
+import android.graphics.drawable.Drawable
+import android.net.Uri
 import android.os.Bundle
 import android.util.Log
-import android.view.View
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
+import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
 import ru.aqsi.commons.models.Cashier
+import ru.aqsi.commons.models.printingModels.BitmapPrintingModel
 import ru.aqsi.commons.models.printingModels.FeedPaper
 import ru.aqsi.commons.models.printingModels.QrShtrihCodePrintingModel
 import ru.aqsi.commons.models.printingModels.StringPrintingModel
 import ru.aqsi.commons.receivers.AqsiResultReceiver
 import ru.aqsi.commons.rmk.*
-import java.util.UUID
+import ru.aqsi.commons.rmk.AqsiRMK.getImageUri
+import java.util.*
 
 
 class MainActivity : AppCompatActivity() {
@@ -41,9 +48,25 @@ class MainActivity : AppCompatActivity() {
         button9.setOnClickListener { this.handleButtonClick9() }
         button0.setOnClickListener { this.handleButtonClick0() }
     }
-
+    fun drawableToBitmap(drawable: Drawable): Bitmap? {
+        if (drawable is BitmapDrawable) {
+            return drawable.bitmap
+        }
+        val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val canvas = Canvas(bitmap)
+        drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight())
+        drawable.draw(canvas)
+        return bitmap
+    }
     private fun handleButtonClick1() {
         val activity = this
+        val d: Drawable? = ContextCompat.getDrawable(this, R.drawable.imagetsumlightbw)
+        val bitmap: Bitmap? = d?.let {
+            drawableToBitmap(it)
+        }
+        val url: String = bitmap?.let {
+            getImageUri(this, it, "tsum_logo.bmp")
+        } ?: run { "" }
         AqsiRMK.print(this, object : AqsiResultReceiver.ResultReceiverCallBack {
             override fun onError(exception: Exception?) {
                 Toast.makeText(activity, exception?.message ?: "ERROR", Toast.LENGTH_LONG).show()
@@ -52,7 +75,8 @@ class MainActivity : AppCompatActivity() {
                 Toast.makeText(activity, data ?: "SUCCESS", Toast.LENGTH_LONG).show()
             }
         }) {
-            center { // Текст внутри блока будет выровнен по центру
+            BitmapPrintingModel(url ?: "")
+            + center { // Текст внутри блока будет выровнен по центру
                 +"Текст по центру"
             }
             +FeedPaper(1) // Прокрутка бумаги, можно использовать любые экземпляры [BasePrintingModel]
@@ -120,7 +144,26 @@ class MainActivity : AppCompatActivity() {
         }
 
     }
-    private fun handleButtonClick6() { }
+    private fun handleButtonClick6() {
+        val activity = this
+        val bitmap: Bitmap? = ContextCompat.getDrawable(this, R.drawable.imagetsumlightbw)?.let {
+            drawableToBitmap(it)
+        }
+        val url: String = bitmap?.let {
+            getImageUri(this, it, "tsum_logo.bmp")
+        } ?: run { "" }
+        AqsiRMK.print(this, object : AqsiResultReceiver.ResultReceiverCallBack {
+            override fun onError(exception: Exception?) {
+                Toast.makeText(activity, exception?.message ?: "ERROR", Toast.LENGTH_LONG).show()
+            }
+            override fun onSuccess(data: String?) {
+                Toast.makeText(activity, data ?: "SUCCESS", Toast.LENGTH_LONG).show()
+            }
+        }) {
+            BitmapPrintingModel(url)
+            +FeedPaper(5)
+        }
+    }
     private fun handleButtonClick7() { }
     private fun handleButtonClick8() { }
     private fun handleButtonClick9() { }
