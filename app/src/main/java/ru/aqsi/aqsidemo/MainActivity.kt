@@ -1,11 +1,16 @@
 package ru.aqsi.aqsidemo
 
+import android.content.Context
+import android.database.Cursor
 import android.graphics.Bitmap
+import android.graphics.BitmapFactory
 import android.graphics.Canvas
 import android.graphics.drawable.BitmapDrawable
 import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
+import android.provider.MediaStore
+import android.renderscript.Sampler
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
@@ -19,6 +24,7 @@ import ru.aqsi.commons.models.printingModels.StringPrintingModel
 import ru.aqsi.commons.receivers.AqsiResultReceiver
 import ru.aqsi.commons.rmk.*
 import ru.aqsi.commons.rmk.AqsiRMK.getImageUri
+import ru.studiq.m2.mcashier.model.classes.App
 import java.util.*
 
 
@@ -52,11 +58,27 @@ class MainActivity : AppCompatActivity() {
         if (drawable is BitmapDrawable) {
             return drawable.bitmap
         }
-        val bitmap = Bitmap.createBitmap(drawable.intrinsicWidth, drawable.intrinsicHeight, Bitmap.Config.ARGB_8888)
+        val width = drawable.intrinsicWidth
+        val height = drawable.intrinsicHeight
+        val bitmap = Bitmap.createBitmap(width, height, Bitmap.Config.ARGB_8888)
         val canvas = Canvas(bitmap)
         drawable.setBounds(0, 0, canvas.getWidth(), canvas.getHeight())
         drawable.draw(canvas)
         return bitmap
+    }
+    fun getRealPathFromUri(context: Context, contentUri: Uri?): String? {
+        var cursor: Cursor? = null
+        return try {
+            val proj = arrayOf(MediaStore.Images.Media.DATA)
+            cursor = contentUri?.let { context.getContentResolver().query(it, proj, null, null, null) }
+            val column_index: Int = cursor?.getColumnIndexOrThrow(MediaStore.Images.Media.DATA) ?: 0
+            cursor?.moveToFirst()
+            cursor?.getString(column_index)
+        } finally {
+            if (cursor != null) {
+                cursor.close()
+            }
+        }
     }
     private fun handleButtonClick1() {
         val activity = this
@@ -67,6 +89,7 @@ class MainActivity : AppCompatActivity() {
         val url: String = bitmap?.let {
             getImageUri(this, it, "tsum_logo.bmp")
         } ?: run { "" }
+        val path = getRealPathFromUri(this, Uri.parse(url))
         AqsiRMK.print(this, object : AqsiResultReceiver.ResultReceiverCallBack {
             override fun onError(exception: Exception?) {
                 Toast.makeText(activity, exception?.message ?: "ERROR", Toast.LENGTH_LONG).show()
@@ -146,12 +169,13 @@ class MainActivity : AppCompatActivity() {
     }
     private fun handleButtonClick6() {
         val activity = this
-        val bitmap: Bitmap? = ContextCompat.getDrawable(this, R.drawable.imagetsumlightbw)?.let {
+        val bitmap: Bitmap? = ContextCompat.getDrawable(this, R.drawable.image_tsum_dark_bw)?.let {
             drawableToBitmap(it)
         }
         val url: String = bitmap?.let {
-            getImageUri(this, it, "tsum_logo.bmp")
+            getImageUri(this, it, "tsum_logo")
         } ?: run { "" }
+        val path = getRealPathFromUri(this, Uri.parse(url))
         AqsiRMK.print(this, object : AqsiResultReceiver.ResultReceiverCallBack {
             override fun onError(exception: Exception?) {
                 Toast.makeText(activity, exception?.message ?: "ERROR", Toast.LENGTH_LONG).show()
@@ -164,7 +188,18 @@ class MainActivity : AppCompatActivity() {
             +FeedPaper(5)
         }
     }
-    private fun handleButtonClick7() { }
+    private fun handleButtonClick7() {
+        val activity = this
+        val bmp = BitmapFactory.decodeResource(App.appContext.resources, R.drawable.image_tsum_dark_bw)
+        AqsiRMK.getImageUri(this, bmp, UUID.randomUUID().toString())?.let {
+            AqsiRMK.print(this, object : AqsiResultReceiver.ResultReceiverCallBack {
+                override fun onError(exception: Exception?) {}
+                override fun onSuccess(data: String?) {}
+            }) {
+                BitmapPrintingModel(it)
+            }
+        }
+    }
     private fun handleButtonClick8() { }
     private fun handleButtonClick9() { }
     private fun handleButtonClick0() { }
