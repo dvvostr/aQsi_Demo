@@ -10,22 +10,26 @@ import android.graphics.drawable.Drawable
 import android.net.Uri
 import android.os.Bundle
 import android.provider.MediaStore
-import android.renderscript.Sampler
 import android.util.Log
 import android.widget.Toast
 import androidx.appcompat.app.AppCompatActivity
 import androidx.core.content.ContextCompat
 import com.google.android.material.button.MaterialButton
-import ru.aqsi.commons.models.Cashier
+import ru.aqsi.commons.models.*
 import ru.aqsi.commons.models.printingModels.BitmapPrintingModel
 import ru.aqsi.commons.models.printingModels.FeedPaper
 import ru.aqsi.commons.models.printingModels.QrShtrihCodePrintingModel
 import ru.aqsi.commons.models.printingModels.StringPrintingModel
+import ru.aqsi.commons.receivers.AqsiDataResultReceiver
 import ru.aqsi.commons.receivers.AqsiResultReceiver
+import ru.aqsi.commons.receivers.ChequePrintResultReceiver
 import ru.aqsi.commons.rmk.*
 import ru.aqsi.commons.rmk.AqsiRMK.getImageUri
+import ru.aqsi.commons.rmk.AqsiRMK.processChequeInBackground
+import ru.aqsi.commons.rmk.enums.*
 import ru.studiq.m2.mcashier.model.classes.App
 import java.util.*
+import kotlin.collections.ArrayList
 
 
 class MainActivity : AppCompatActivity() {
@@ -39,6 +43,26 @@ class MainActivity : AppCompatActivity() {
     private val button8 by lazy { findViewById<MaterialButton?>(R.id.main_button_test8) }
     private val button9 by lazy { findViewById<MaterialButton?>(R.id.main_button_test9) }
     private val button0 by lazy { findViewById<MaterialButton?>(R.id.main_button_test0) }
+
+//    var chequePrintCallBack: ChequePrintResultReceiver.ChequePrintCallBack = object : ChequePrintResultReceiver.ChequePrintCallBack {
+//        override fun onError(exception: Exception?) {
+//            Toast.makeText(this@MainActivity, "ERROR ${exception.message}", Toast.LENGTH_SHORT).show()
+//        }
+//        override fun onSuccess(paramsChequePrint: ParamsChequePrint?) {
+//            Toast.makeText(this@MainActivity, "SUCCESS", Toast.LENGTH_SHORT).show()
+//        }
+//
+//    }
+var chequePrintCallBack: AqsiDataResultReceiver.AqsiCallback<Cheque> = object : AqsiDataResultReceiver.AqsiCallback<Cheque> {
+    override fun onError(exception: Exception?) {
+            Toast.makeText(this@MainActivity, "ERROR ${exception?.message ?: "<>"}", Toast.LENGTH_SHORT).show()
+    }
+
+    override fun onSuccess(result: Cheque?, errorList: ArrayList<Throwable>?) {
+            Toast.makeText(this@MainActivity, "SUCCESS", Toast.LENGTH_SHORT).show()
+    }
+
+}
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -201,7 +225,119 @@ class MainActivity : AppCompatActivity() {
             }
         }
     }
-    private fun handleButtonClick8() { }
-    private fun handleButtonClick9() { }
+    private fun handleButtonClick8() {
+        val activity = this
+        var positions = (arrayListOf<ru.aqsi.commons.models.ChequePosition>())
+
+        val cashier = getAllCashiers().firstOrNull() {
+            it.cashierPosition == Cashier.ADMIN
+        }
+        ActiveCashierDB.setActiveCashier(activity, cashier?.id ?: "")
+
+        arrayOf(1, 2, 3).forEach {
+            val price: Double = it * 100.0
+            positions.add(
+                ChequePosition(
+                    quantity = 1.0,
+                    priceBrutto = price,
+                    price = price,
+                    text = "${it} product description",
+                    tax = TaxType.TAX_20.id,
+                    quantityMeasurementUnit = QuantityUnit.OTHER.id,
+                    unit = "pc",
+                    unitCode = QuantityUnit.OTHER.id,
+                    minPrice = price,
+                    nomenclatureString = "${it}.barcode",
+                )
+            )
+        }
+        val paymants: ArrayList<Payment> = arrayListOf()
+        paymants.add(Payment(
+            PaymentMethod.CASH.id,
+            601.0,
+            1.0,
+            null,
+            null,
+            null,
+            PaymentStatus.PAID.id,
+            null,
+            null
+        ))
+
+        var params: ru.aqsi.commons.models.ChequeProcessingParams? =  ru.aqsi.commons.models.ChequeProcessingParams(
+            withoutChange = true, //Boolean? = null
+            chequeType = ru.aqsi.commons.rmk.enums.ChequeType.INPUT.id,
+            paymentMethod = ru.aqsi.commons.rmk.enums.PaymentMethod.CASH.id,
+            taxSystem = ru.aqsi.commons.rmk.enums.TaxSystem.OSN
+
+        )
+        ru.aqsi.commons.rmk.AqsiRMK.processChequeInBackground(
+            context = this,
+            positions = positions,
+            callback = object : ru.aqsi.commons.receivers.AqsiDataResultReceiver.AqsiCallback<ru.aqsi.commons.models.Cheque> {
+                override fun onSuccess(result: Cheque?, errorList: ArrayList<Throwable>?) {
+                    Toast.makeText(activity, "SUCESS", Toast.LENGTH_LONG).show()
+                }
+                override fun onError(exception: Exception?) {
+                    Toast.makeText(activity, "ERROR: ${exception?.message ?: "<>"}", Toast.LENGTH_LONG).show()
+                }
+            },
+            params = params
+        )
+    }
+    private fun handleButtonClick9() {
+        val params = ChequeProcessingParams()
+        params.withoutChange = true
+        params.chequeType = ChequeType.INPUT.id
+        params.paymentMethod = PaymentMethod.CASH.id
+        params.taxSystem = TaxSystem.OSN
+
+        val chequePositions: ArrayList<ChequePosition> = ArrayList<ChequePosition>(1)
+        var chequePosition = ChequePosition()
+        chequePosition = ChequePosition()
+
+        val payments: ArrayList<Payment> = ArrayList<Payment>(10)
+
+        val payment: Payment
+        payment = Payment(
+            PaymentMethod.CASH.id,
+            2.0,
+            2.0,
+            null,
+            null,
+            null,
+            PaymentStatus.PAID.id,
+            null,
+            null
+        )
+
+        payments.add(payment)
+
+
+        processChequeInBackground(
+            this@MainActivity,
+            chequePositions,
+            chequePrintCallBack,
+            ChequeType.INPUT.id,
+            payments,
+            null,
+            null,
+            true,
+            "",
+            "",
+            "",
+            "",
+            "", TaxSystem.OSN,
+            "",
+            null,
+            "",
+            "",
+            "",
+            "",
+            "",
+            null,
+            null
+        )
+    }
     private fun handleButtonClick0() { }
 }
